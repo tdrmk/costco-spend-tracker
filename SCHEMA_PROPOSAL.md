@@ -16,6 +16,7 @@ Stores unique items sold at Costco (both warehouse and gas).
 *   `item_number` (TEXT PRIMARY KEY) - e.g., `"1303463"` or `"800599"` (Gas)
 *   `item_name` (TEXT) - e.g., `"VITALPROTEIN"`
 *   `item_details` (TEXT) - e.g., `"COLLAGEN 1.5LBS P360 CU45"`
+*   `friendly_name` (TEXT) - Optional, human-readable name for UI display (e.g., `"Vital Proteins Collagen"`)
 *   `department_number` (INTEGER) - e.g., `20`
 *   `is_taxed` (TEXT) - `"Y"` or `"N"` (Assuming this is static per product in your state)
 *   `item_identifier` (TEXT) - `"E"`, `"F"`, or null

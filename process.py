@@ -29,6 +29,7 @@ def setup_database(db_path: str = "costco_spend.db") -> sqlite3.Connection:
             item_number TEXT PRIMARY KEY,
             item_name TEXT,
             item_details TEXT,
+            friendly_name TEXT,
             department_number INTEGER,
             is_taxed TEXT,
             item_identifier TEXT

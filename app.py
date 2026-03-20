@@ -28,7 +28,7 @@ def load_data():
     
     # 2. Load Warehouse Purchases
     warehouse_df = pd.read_sql("""
-        SELECT wp.*, p.item_name, p.item_details, p.department_number, p.item_identifier, p.is_taxed,
+        SELECT wp.*, p.item_name, p.item_details, p.friendly_name, p.department_number, p.item_identifier, p.is_taxed,
                r.transaction_datetime, r.user_name, w.warehouse_name
         FROM warehouse_purchases wp
         JOIN products p ON wp.item_number = p.item_number
@@ -557,7 +557,7 @@ with tab6:
         # Group by item_number to aggregate stats
         # We dropna=False so we don't accidentally drop items that have a NULL item_identifier
         catalog_df = f_warehouse_calc.groupby(
-            ['item_number', 'item_name', 'item_details', 'category', 'item_identifier'], 
+            ['item_number', 'item_name', 'friendly_name', 'item_details', 'category', 'item_identifier'], 
             dropna=False
         ).agg(
             times_bought=('transaction_barcode', 'count'),
@@ -590,7 +590,7 @@ with tab6:
         
         # Reorder and format columns for display
         display_catalog = catalog_df[[
-            'item_name', 'item_details', 'category', 'eligibility', 
+            'item_name', 'friendly_name', 'item_details', 'category', 'eligibility', 
             'times_bought', 'total_spend', 
             'min_price', 'max_price', 'last_price', 
             'first_bought', 'last_bought'
@@ -605,7 +605,7 @@ with tab6:
             
         # Rename columns for the UI
         display_catalog.columns = [
-            'Item Name', 'Details', 'Category', 'Eligibility', 
+            'Receipt Name', 'Friendly Name', 'Details', 'Category', 'Eligibility', 
             'Times Bought', 'Total Spend', 
             'Lowest Price', 'Highest Price', 'Last Price', 
             'First Bought', 'Last Bought'
@@ -614,7 +614,8 @@ with tab6:
         # Add a search box to filter the dataframe
         search_term = st.text_input("🔍 Search for an item:", "")
         if search_term:
-            mask = display_catalog['Item Name'].str.contains(search_term, case=False, na=False) | \
+            mask = display_catalog['Receipt Name'].str.contains(search_term, case=False, na=False) | \
+                   display_catalog['Friendly Name'].str.contains(search_term, case=False, na=False) | \
                    display_catalog['Details'].str.contains(search_term, case=False, na=False) | \
                    display_catalog['Category'].str.contains(search_term, case=False, na=False)
             display_catalog = display_catalog[mask]
