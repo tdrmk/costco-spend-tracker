@@ -56,6 +56,7 @@ This stage is a **multi-page Streamlit app** that reads from the local SQLite da
    - **Gas Analysis** — fuel usage and price trends
    - **Item Insights** — price history for repeat purchases
    - **Product Catalog** — searchable purchase history
+   - **Trip History** — calendar view of visits (warehouse vs gas), respects sidebar filters
 
 Shared filters (date range and household member) are in the sidebar on each page.
 
