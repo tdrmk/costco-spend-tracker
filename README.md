@@ -41,17 +41,22 @@ This script parses the downloaded JSON receipts, normalizes the data, applies di
    python process.py
    ```
 
-### Stage 3: Visualization (`app.py` & `calendar_app.py`)
-This stage provides interactive Streamlit dashboards to visualize the processed data directly from the local SQLite database.
+### Stage 3: Visualization (`Home.py` + `pages/`)
+This stage is a **multi-page Streamlit app** that reads from the local SQLite database (`costco_spend.db`). Use the sidebar to switch between views.
 
-1. Run the main dashboard:
+1. Run the app from the project root:
    ```bash
-   streamlit run app.py
+   streamlit run Home.py
    ```
-   This will open a dashboard in your browser with filters for date ranges, household members, and warehouses, along with charts breaking down spend by category and location.
 
-2. Run the calendar view (optional):
-   ```bash
-   streamlit run calendar_app.py
-   ```
-   This provides an alternative calendar-based visualization of your spending.
+2. **Pages** (sidebar):
+   - **Overview** — metrics, monthly trends, warehouse spend by category
+   - **Receipts** — trip timeline and receipt explorer
+   - **FSA/HSA** — eligible items for reimbursement
+   - **Gas Analysis** — fuel usage and price trends
+   - **Item Insights** — price history for repeat purchases
+   - **Product Catalog** — searchable purchase history
+
+Shared filters (date range and household member) are in the sidebar on each page.
+
+The app uses `data_loader.py` for cached database reads and consistent filtering across pages.
