@@ -1,5 +1,6 @@
-import streamlit as st
+import pandas as pd
 import plotly.express as px
+import streamlit as st
 from data_loader import load_data, apply_filters
 
 st.set_page_config(page_title="Costco Spend Tracker - Item Insights", page_icon="🛒", layout="wide")
@@ -15,14 +16,12 @@ f_receipts, f_warehouse, f_gas = apply_filters(receipts_df, warehouse_df, gas_df
 st.header("Item Price History (Inflation Tracker)")
 st.write("Track how the price of your favorite staples has changed over time.")
 
-# Filter out items only bought once to make the list more relevant
-item_counts = f_warehouse['item_name'].value_counts()
-repeat_items = item_counts[item_counts > 1].index.tolist()
+candidates = sorted(f_warehouse["item_name"].dropna().unique().tolist())
 
-if not repeat_items:
-    st.info("No repeat items found in the selected date range.")
+if not candidates:
+    st.info("No items found in the selected date range.")
 else:
-    selected_item = st.selectbox("Select an item to analyze:", sorted(repeat_items))
+    selected_item = st.selectbox("Select an item to analyze:", candidates)
     
     item_data = f_warehouse[f_warehouse['item_name'] == selected_item].sort_values('date').copy()
     
@@ -43,14 +42,18 @@ else:
         min_date_str = item_data[item_data['effective_price'] == min_price].iloc[0]['date'].strftime('%b %Y')
         max_date_str = item_data[item_data['effective_price'] == max_price].iloc[0]['date'].strftime('%b %Y')
         
-        # Get the most recent description and category for this item
-        item_desc = item_data.iloc[-1].get('item_details', '')
-        item_cat = item_data.iloc[-1].get('category', 'Unknown')
-        
-        if item_desc:
-            st.caption(f"**Category:** {item_cat} | **Details:** {item_desc}")
-        else:
-            st.caption(f"**Category:** {item_cat}")
+        last_row = item_data.iloc[-1]
+        item_cat = last_row.get("category", "Unknown")
+        item_fn = last_row.get("friendly_name", None)
+        item_desc = last_row.get("item_details", "") or ""
+
+        caption_parts = [f"**Category:** {item_cat}"]
+        if pd.notna(item_fn) and str(item_fn).strip():
+            caption_parts.append(f"**Friendly name:** {str(item_fn).strip()}")
+        if str(item_desc).strip():
+            caption_parts.append(f"**Details:** {str(item_desc).strip()}")
+
+        st.caption(" | ".join(caption_parts))
         
         col1, col2, col3 = st.columns(3)
         col1.metric("Last Paid Price", f"${last_price:,.2f}", f"on {last_date_str}", delta_color="off")
