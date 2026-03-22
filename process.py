@@ -97,24 +97,24 @@ def save_to_db(conn: sqlite3.Connection, warehouses: Dict, products: Dict, recei
     """Inserts the processed data into the SQLite database."""
     cursor = conn.cursor()
     
-    # 1. Insert Warehouses (REPLACE updates existing records if Costco changed the name/address)
+    # 1. Insert Warehouses (IGNORE keeps existing rows so manual edits / stable lookups persist)
     warehouse_tuples = [
         (w["warehouse_number"], w["warehouse_name"], w["address"], w["city"], w["state"], w["zip_code"])
         for w in warehouses.values()
     ]
     cursor.executemany("""
-        INSERT OR REPLACE INTO warehouses 
+        INSERT OR IGNORE INTO warehouses 
         (warehouse_number, warehouse_name, address, city, state, zip_code) 
         VALUES (?, ?, ?, ?, ?, ?)
     """, warehouse_tuples)
     
-    # 2. Insert Products (REPLACE updates existing records)
+    # 2. Insert Products (IGNORE keeps existing rows, e.g. manual friendly_name)
     product_tuples = [
         (p["item_number"], p["item_name"], p["item_details"], p["department_number"], p["is_taxed"], p["item_identifier"])
         for p in products.values()
     ]
     cursor.executemany("""
-        INSERT OR REPLACE INTO products 
+        INSERT OR IGNORE INTO products 
         (item_number, item_name, item_details, department_number, is_taxed, item_identifier) 
         VALUES (?, ?, ?, ?, ?, ?)
     """, product_tuples)

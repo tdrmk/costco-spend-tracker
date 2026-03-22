@@ -32,7 +32,7 @@ costco-spend-tracker/
 *   **Parsing:** Iterate through the downloaded JSON receipt files.
 *   **Normalization:** Extract data into 5 distinct tables (`warehouses`, `products`, `receipts`, `warehouse_purchases`, `gas_purchases`) to eliminate redundancy.
 *   **Business Logic:** Correctly apply Costco's unique discount format (negative items) to the preceding product and calculate proportional taxes based on the adjusted item amounts.
-*   **Database Loading:** Insert the records into a local SQLite database (`costco_spend.db`). Uses `INSERT OR REPLACE` and `INSERT OR IGNORE` with unique constraints to ensure idempotent runs (no duplicate records if the script is run multiple times).
+*   **Database Loading:** Insert the records into a local SQLite database (`costco_spend.db`). Uses `INSERT OR IGNORE` for lookup tables (`warehouses`, `products`) so reruns do not overwrite rows (e.g. manual `friendly_name`), and `INSERT OR IGNORE` for receipts and line items with unique constraints so idempotent runs never duplicate transaction data.
 
 ## Stage 3: Visualization (`app.py`)
 **Goal:** Provide an interactive dashboard to view and analyze spending.
