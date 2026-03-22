@@ -11,7 +11,9 @@ if receipts_df is None or receipts_df.empty:
     st.error("No database found. Please run `python process.py` first.")
     st.stop()
 
-f_receipts, f_warehouse, f_gas = apply_filters(receipts_df, warehouse_df, gas_df)
+f_receipts, f_warehouse, f_gas, filter_start_date, filter_end_date = apply_filters(
+    receipts_df, warehouse_df, gas_df
+)
 
 st.header("Item Price History (Inflation Tracker)")
 st.write("Track how the price of your favorite staples has changed over time.")
@@ -64,6 +66,8 @@ else:
         fig = px.line(item_data, x='date', y='effective_price', markers=True, 
                       title=f"Effective Price Trend (After Discounts): {selected_item}")
         fig.update_layout(yaxis_title="Effective Price ($)", xaxis_title="Date", height=300)
+        # X-axis spans full sidebar date range (not just dates where this item was bought)
+        fig.update_xaxes(range=[filter_start_date, filter_end_date])
         # Add a slight buffer to the y-axis so the line doesn't touch the very top/bottom
         fig.update_yaxes(range=[min_price * 0.9, max_price * 1.1])
         st.plotly_chart(fig, use_container_width=True)

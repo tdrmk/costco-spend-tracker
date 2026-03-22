@@ -64,7 +64,7 @@ def load_data():
     return receipts_df, warehouse_df, gas_df
 
 def apply_filters(receipts_df, warehouse_df, gas_df):
-    """Applies sidebar filters and returns filtered dataframes"""
+    """Applies sidebar filters and returns filtered dataframes plus the selected date range (inclusive)."""
     st.sidebar.title("🛒 Costco Tracker")
     
     min_date = receipts_df['date'].min()
@@ -88,5 +88,11 @@ def apply_filters(receipts_df, warehouse_df, gas_df):
         r_mask &= (receipts_df['user_name'] == selected_user)
         w_mask &= (warehouse_df['user_name'] == selected_user)
         g_mask &= (gas_df['user_name'] == selected_user)
-        
-    return receipts_df[r_mask], warehouse_df[w_mask], gas_df[g_mask]
+
+    return (
+        receipts_df[r_mask],
+        warehouse_df[w_mask],
+        gas_df[g_mask],
+        start_date,
+        end_date,
+    )

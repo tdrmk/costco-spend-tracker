@@ -9,7 +9,7 @@ if receipts_df is None or receipts_df.empty:
     st.error("No database found. Please run `python process.py` first.")
     st.stop()
 
-f_receipts, f_warehouse, f_gas = apply_filters(receipts_df, warehouse_df, gas_df)
+f_receipts, f_warehouse, f_gas, _, _ = apply_filters(receipts_df, warehouse_df, gas_df)
 
 st.header("FSA / HSA Eligible Items")
 
