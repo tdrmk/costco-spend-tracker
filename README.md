@@ -51,12 +51,11 @@ This stage is a **multi-page Streamlit app** that reads from the local SQLite da
 
 2. **Pages** (sidebar):
    - **Overview** — metrics, monthly trends, warehouse spend by category
-   - **Receipts** — trip timeline and receipt explorer
+   - **Receipts** — calendar + dropdown to pick a visit; full receipt detail (line items, category pie)
    - **FSA/HSA** — eligible items for reimbursement
    - **Gas Analysis** — fuel usage and price trends
    - **Item Insights** — price history for repeat purchases
    - **Product Catalog** — searchable purchase history
-   - **Trip History** — calendar view of visits (warehouse vs gas), respects sidebar filters
 
 Shared filters (date range and household member) are in the sidebar on each page.
 
