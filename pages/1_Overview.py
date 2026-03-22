@@ -11,7 +11,9 @@ if receipts_df is None or receipts_df.empty:
     st.error("No database found. Please run `python process.py` first.")
     st.stop()
 
-f_receipts, f_warehouse, f_gas, _, _ = apply_filters(receipts_df, warehouse_df, gas_df)
+f_receipts, f_warehouse, f_gas, filter_start_date, filter_end_date = apply_filters(
+    receipts_df, warehouse_df, gas_df
+)
 
 st.header("Overview")
 
@@ -100,21 +102,40 @@ if not f_warehouse.empty:
         trend_df['year_month'] = pd.to_datetime(trend_df['date']).dt.to_period('M').astype(str)
         
         # Group and sum
-        monthly_cat_spend = trend_df.groupby(['year_month', 'category'])['true_total'].sum().reset_index()
-        
+        monthly_cat_spend = trend_df.groupby(["year_month", "category"])["true_total"].sum().reset_index()
+
+        # Every calendar month in the sidebar range (so the x-axis shows the full period, including $0 months)
+        trend_months = (
+            pd.period_range(
+                start=pd.Timestamp(filter_start_date),
+                end=pd.Timestamp(filter_end_date),
+                freq="M",
+            )
+            .astype(str)
+            .tolist()
+        )
+        full_grid = pd.MultiIndex.from_product(
+            [trend_months, selected_trend_cats], names=["year_month", "category"]
+        ).to_frame(index=False)
+        monthly_cat_spend = full_grid.merge(
+            monthly_cat_spend, on=["year_month", "category"], how="left"
+        )
+        monthly_cat_spend["true_total"] = monthly_cat_spend["true_total"].fillna(0.0)
+
         # Create the stacked bar figure
         fig_monthly_cat = px.bar(
-            monthly_cat_spend, 
-            x='year_month', 
-            y='true_total', 
-            color='category',
+            monthly_cat_spend,
+            x="year_month",
+            y="true_total",
+            color="category",
             title="Warehouse Spend by Category over Time",
-            labels={'true_total': 'Spend ($)', 'year_month': 'Month', 'category': 'Category'},
-            category_orders={"category": category_order}
+            labels={"true_total": "Spend ($)", "year_month": "Month", "category": "Category"},
+            category_orders={"category": category_order},
         )
-        
+
         # Force the layout to stack the bars
-        fig_monthly_cat.update_layout(barmode='stack')
+        fig_monthly_cat.update_layout(barmode="stack")
+        fig_monthly_cat.update_xaxes(categoryorder="array", categoryarray=trend_months)
         fig_monthly_cat.update_yaxes(tickformat="$.2f")
         
         st.plotly_chart(fig_monthly_cat, use_container_width=True)
