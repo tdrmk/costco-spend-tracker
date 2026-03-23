@@ -60,7 +60,7 @@ if not f_warehouse.empty:
     # Reorder and format columns for display
     display_catalog = catalog_df[[
         'item_name', 'friendly_name', 'item_details', 'category', 'eligibility', 
-        'times_bought', 'total_spend', 
+        'times_bought', 'total_qty', 'total_spend', 
         'min_price', 'max_price', 'last_price', 
         'first_bought', 'last_bought'
     ]].copy()
@@ -74,22 +74,36 @@ if not f_warehouse.empty:
         
     # Rename columns for the UI
     display_catalog.columns = [
-        'Receipt Name', 'Friendly Name', 'Details', 'Category', 'Eligibility', 
-        'Times Bought', 'Total Spend', 
-        'Lowest Price', 'Highest Price', 'Last Price', 
-        'First Bought', 'Last Bought'
+        'Receipt Name', 'Friendly Name', 'Details', 'Category', 'Eligibility',
+        'Times Bought', 'Total Qty', 'Total Spend',
+        'Lowest Price', 'Highest Price', 'Last Price',
+        'First Bought', 'Last Bought',
     ]
     
-    # Add a search box to filter the dataframe
-    search_term = st.text_input("🔍 Search for an item:", "")
+    category_options = ["All categories"] + sorted(
+        catalog_df["category"].dropna().unique().tolist(), key=str
+    )
+
+    col_search, col_category = st.columns([2, 1])
+    with col_search:
+        search_term = st.text_input("🔍 Search for an item:", "")
+    with col_category:
+        selected_category = st.selectbox("Category", category_options, index=0)
+
+    if selected_category != "All categories":
+        display_catalog = display_catalog[
+            display_catalog["Category"] == selected_category
+        ]
     if search_term:
         mask = display_catalog['Receipt Name'].str.contains(search_term, case=False, na=False) | \
                display_catalog['Friendly Name'].str.contains(search_term, case=False, na=False) | \
                display_catalog['Details'].str.contains(search_term, case=False, na=False) | \
                display_catalog['Category'].str.contains(search_term, case=False, na=False)
         display_catalog = display_catalog[mask]
+
+    if search_term or selected_category != "All categories":
         st.caption(f"Showing {len(display_catalog)} matching items.")
         
-    st.dataframe(display_catalog, hide_index=True, use_container_width=True, height=600)
+    st.dataframe(display_catalog, hide_index=True, width='content', height='content')
 else:
     st.info("No warehouse items found.")
